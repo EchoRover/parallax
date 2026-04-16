@@ -16,16 +16,16 @@ AI-powered communication pre-flight. Paste any pitch, email, cover letter, or RE
 
 **Live app:** [parallax-ai.vercel.app](https://parallax-ai.vercel.app)
 
-![Landing](public/screenshots/01-landing.png)
+![Landing](https://raw.githubusercontent.com/EchoRover/parallax/main/public/screenshots/01-landing.png)
 
 ### The Flow
 
 | Step | Screenshot |
 |------|-----------|
-| **Write** — paste your communication | ![Write](public/screenshots/05-write-filled.png) |
-| **Choose perspectives** — pick personas + describe audience | ![Personas](public/screenshots/06-personas.png) |
-| **Dashboard** — track all your analyses | ![Dashboard](public/screenshots/03-dashboard.png) |
-| **Community** — browse and share persona prompts | ![Community](public/screenshots/07-community.png) |
+| **Write** — paste your communication | ![Write](https://raw.githubusercontent.com/EchoRover/parallax/main/public/screenshots/05-write-filled.png) |
+| **Choose perspectives** — pick personas + describe audience | ![Personas](https://raw.githubusercontent.com/EchoRover/parallax/main/public/screenshots/06-personas.png) |
+| **Dashboard** — track all your analyses | ![Dashboard](https://raw.githubusercontent.com/EchoRover/parallax/main/public/screenshots/03-dashboard.png) |
+| **Community** — browse and share persona prompts | ![Community](https://raw.githubusercontent.com/EchoRover/parallax/main/public/screenshots/07-community.png) |
 
 ---
 
