@@ -115,9 +115,13 @@ npm run dev
 
 ## Documentation
 
-A detailed technical report is available: [`report.tex`](report.tex)
+A detailed technical report is available: [**report.pdf**](report.pdf) ([LaTeX source](report.tex))
 
 Covers: problem statement, architecture decisions, persona engineering methodology, chunk-based reading design, data model, challenges, and practical relevance.
+
+## Demo Video
+
+[Watch on YouTube](YOUR_YOUTUBE_URL_HERE) — 66 second walkthrough showing the full flow from login to results.
 
 ---
 
