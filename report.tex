@@ -1,0 +1,205 @@
+\documentclass[a4paper, 11pt, twocolumn]{article}
+\usepackage[table]{xcolor}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.8in]{geometry}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyfoot{}
+\fancyhead[L]{Tech Builders 2026}
+\fancyhead[C]{\textsc{Parallax}}
+\fancyhead[R]{April 2026}
+\fancyfoot[R]{Page \thepage}
+
+\usepackage{amsmath}
+\usepackage{graphicx, float}
+\usepackage{booktabs}
+\usepackage[labelfont=bf, skip=5pt, font=small]{caption}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\urlstyle{same}
+
+\usepackage[shortlabels]{enumitem}
+\usepackage{listings}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!10},
+  columns=fullflexible
+}
+
+\titleformat{\section}[block]{\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}[block]{\normalfont\large\bfseries}{\thesubsection}{1em}{}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+\renewcommand{\headrulewidth}{0.2pt}
+\renewcommand{\footrulewidth}{0.2pt}
+\setlength{\headheight}{15pt}
+
+\newcommand{\heady}[1]{\subsubsection*{\underline{#1}}}
+
+\begin{document}
+
+\twocolumn[{
+\thispagestyle{empty}
+\begin{center}
+    \textsc{\small Tech Builders Program Hackathon 2026} \\
+    \vspace{0.15cm}
+    {\Huge \textbf{Parallax}} \\
+    \vspace{0.15cm}
+    {\large See Your Words Through Their Eyes} \\
+    \vspace{0.3cm}
+    {\Large Evan Johan Tobias} \\
+    \vspace{0.05cm}
+    {\normalsize IIT Delhi -- Abu Dhabi} \\
+    \vspace{0.05cm}
+    {\small April 2026}
+\end{center}
+\vspace{0.15cm}
+\hrule
+\vspace{0.4cm}
+}]
+
+\section{Problem Statement}
+
+Every communication has an audience, and every audience reads differently. A venture capitalist scans for numbers and unit economics before reading a single sentence of prose. A recruiter spends 6 seconds on a cover letter before deciding to read further or skip. A first-year student re-reads jargon three times and still does not understand it.
+
+The core problem is \textbf{perspective blindness}: when you write something, you have all the context, so every sentence makes sense to you. Your audience does not share that context. They bring their own priorities, knowledge gaps, and biases. You literally cannot read your own writing through someone else's eyes.
+
+Current solutions address parts of this problem:
+\begin{itemize}[nosep, leftmargin=1.2em]
+    \item \textbf{Speech coaching tools} (Yoodli, Orai, Poised) analyze delivery --- pace, filler words, confidence --- but never touch the \textit{content} of what you are saying.
+    \item \textbf{Message testing platforms} (Wynter) use real human panels, but cost \$800+/month with 12--48 hour turnarounds.
+    \item \textbf{Synthetic audience platforms} (Ask Rally, Artificial Societies) are enterprise-only, require significant setup, and are designed for market research, not communication pre-testing.
+\end{itemize}
+
+No existing tool lets you paste a communication and instantly see how different specific audience types react to the \textit{actual content}, informed by real-time context, with concrete improvement suggestions.
+
+\section{Solution Overview}
+
+Parallax is an AI-powered communication pre-flight tool. The user pastes any communication --- a pitch, email, cover letter, README, internal memo --- and describes their target audience. Parallax then:
+
+\begin{enumerate}[nosep, leftmargin=1.2em]
+    \item \textbf{Researches the audience} using Gemini with Google Search grounding, building a contextual brief about who they are, what they currently care about, and what red flags they watch for.
+    \item \textbf{Deploys independent AI personas in parallel}, each reading the text chunk by chunk with sequential memory --- simulating how a real human reads.
+    \item \textbf{Returns a timeline of reactions} --- first-person inner monologue from each persona, linked to exact quotes, with severity ratings and concrete rewrite suggestions.
+\end{enumerate}
+
+\section{Architecture}
+
+\subsection{Tech Stack}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Layer} & \textbf{Technology} \\
+\midrule
+Framework & Next.js 16 (App Router, TypeScript) \\
+Styling & Tailwind CSS 4 \\
+AI Engine & Gemini 2.5 Flash \\
+Search & Google Search Grounding API \\
+Auth + DB & Supabase (PostgreSQL, RLS) \\
+Hosting & Vercel (serverless) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Chunk-Based Sequential Reading}
+
+The most important design decision was \textbf{not} feeding the entire text to the AI in a single prompt. Instead, we split the communication into paragraphs and instruct each persona to read sequentially, maintaining memory across chunks.
+
+This matters because real humans read sequentially. A confusing first paragraph colors everything after. A strong opening buys patience for complexity later. The AI's reactions should reflect this --- and they do, because each chunk's analysis includes the accumulated impressions from all previous chunks.
+
+The text is split at double-newline boundaries (paragraphs). For texts with fewer than 3 paragraphs, a sentence-level splitter groups into chunks of approximately 80 words.
+
+\subsection{Parallel Persona Execution}
+
+Each selected persona runs as an independent \texttt{Promise.all()} call with its own system prompt and the shared research context. This prevents cross-contamination: Sarah Chen (VC) does not know what Marcus Obi (engineer) thinks. Each perspective is genuinely independent.
+
+If one persona's analysis is slow or fails, others still complete. A fallback chain (Gemini 2.5 Flash $\to$ Gemini 2.5 Flash Lite) handles temporary API availability issues.
+
+\subsection{Grounded Research}
+
+Before persona analysis begins, a research step uses Gemini's \textbf{Google Search grounding} to search the live web for current information about the target audience. The resulting brief covers:
+\begin{itemize}[nosep, leftmargin=1.2em]
+    \item Audience profile and priorities
+    \item Current trends and concerns in their domain
+    \item What they expect from communication like this
+    \item Red flags that trigger distrust
+\end{itemize}
+
+This brief is transparent --- users can read it --- and is passed as context to every persona, making feedback grounded in current reality rather than generic assumptions.
+
+\subsection{Persona Engineering}
+
+Each default persona has a \textbf{500+ word system prompt} covering seven behavioral dimensions:
+
+\begin{enumerate}[nosep, leftmargin=1.2em]
+    \item \textbf{Background}: specific career history and formative experiences
+    \item \textbf{Reading pattern}: physical eye movement, scan order, time allocation
+    \item \textbf{First-notice triggers}: what draws attention before reading begins
+    \item \textbf{Internal biases}: what builds trust vs. skepticism
+    \item \textbf{Pet peeves}: specific phrases or patterns that trigger negative reactions, with example internal thoughts
+    \item \textbf{Win conditions}: what makes them lean in and engage
+    \item \textbf{Memory behavior}: how impressions accumulate and compound
+\end{enumerate}
+
+This depth is what differentiates Parallax from generic AI feedback. A 50-word persona prompt produces generic suggestions. A 500-word prompt with specific reading patterns, biases, and example thoughts produces genuinely distinct perspectives.
+
+\section{Data Model}
+
+Two primary tables with Row Level Security:
+
+\heady{analyses}
+Stores each analysis run: user ID, script text, audience description, research brief (JSONB), persona results (JSONB), text chunks, and timestamps. RLS ensures users can only read their own analyses.
+
+\heady{community\_personas}
+Stores user-created persona prompts shared with the community: name, role, category, full system prompt, upvote count. Publicly readable, privately writable.
+
+\section{Challenges}
+
+\heady{API Availability}
+Gemini's Google Search grounding experienced intermittent 503 errors during development. We implemented a three-tier fallback: grounded model $\to$ standard model $\to$ lite model. The research step degrades to non-grounded analysis rather than failing entirely.
+
+\heady{Persona Distinctness}
+Early versions produced nearly identical feedback regardless of persona. The root cause was shallow system prompts (2--3 sentences describing a role). The fix was investing in deeply detailed behavioral prompts that specify not just \textit{who} the persona is, but \textit{how they physically read}, what triggers specific reactions, and how their impressions compound over time.
+
+\heady{Chunk Boundaries}
+Naive splitting at double-newlines fails for single-paragraph texts or texts without clear paragraph structure. The fallback sentence-level splitter groups into approximately 80-word chunks, preserving sentence boundaries.
+
+\section{Practical Relevance}
+
+Parallax addresses a gap that affects anyone who writes for an audience:
+
+\begin{itemize}[nosep, leftmargin=1.2em]
+    \item \textbf{Founders} pitching investors --- test against skeptical VC personas before the real meeting
+    \item \textbf{Job seekers} writing cover letters --- see the recruiter's 6-second scan pattern
+    \item \textbf{Developers} writing READMEs --- check if first-time users can follow along
+    \item \textbf{Students} preparing presentations --- know where the audience gets lost before going live
+    \item \textbf{Teams} crafting announcements --- pre-test across different stakeholder types
+\end{itemize}
+
+The target market is the millions of creators, students, and professionals who will never hire focus groups or PR agencies but deserve to know how their words land before they hit send.
+
+\section{Future Work}
+
+\begin{itemize}[nosep, leftmargin=1.2em]
+    \item \textbf{Community persona marketplace} --- users share and discover detailed persona prompts crafted by domain experts
+    \item \textbf{Side-by-side comparison} --- view how multiple personas react to the same section simultaneously
+    \item \textbf{Iterative improvement tracking} --- edit based on feedback, re-analyze, measure score changes across versions
+    \item \textbf{API access} --- integrate Parallax into team content workflows via REST endpoints
+\end{itemize}
+
+\section*{Links}
+
+\begin{itemize}[nosep, leftmargin=1.2em]
+    \item GitHub: \url{https://github.com/EchoRover/parallax}
+    \item Live: \url{https://parallax-app.vercel.app}
+\end{itemize}
+
+\end{document}
